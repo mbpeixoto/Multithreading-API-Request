@@ -32,29 +32,12 @@ type BrasilApi struct {
 }
 
 func main() {
-	canal1 := make(chan BrasilApi)
-	canal2 := make(chan ViaCep)
 
-	cep := "71503503"
+	canal1 := make(chan ViaCep)
+	canal2 := make(chan BrasilApi)
 
-	go func() {
-
-		req, err := http.Get("https://brasilapi.com.br/api/cep/v1/" + cep)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Erro ao fazer requisição: %v\n", err)
-		}
-		defer req.Body.Close()
-		res, err := io.ReadAll(req.Body)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Erro ao ler resposta: %v\n", err)
-		}
-		var dados BrasilApi
-		err = json.Unmarshal(res, &dados)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Erro ao fazer parse da resposta: %v\n", err)
-		}
-		canal1 <- dados
-	}()
+	// Exemplo aleatório de CEP para teste
+	cep := "01001000"
 
 	go func() {
 		req, err := http.Get("http://viacep.com.br/ws/" + cep + "/json/")
@@ -72,20 +55,47 @@ func main() {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Erro ao fazer parse da resposta: %v\n", err)
 		}
+
+		//Simulando um delay para testar o time out
+		//time.Sleep(2 * time.Second) // Simulando um delay
+
+		canal1 <- dados
+	}()
+
+	go func() {
+
+		req, err := http.Get("https://brasilapi.com.br/api/cep/v1/" + cep)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Erro ao fazer requisição: %v\n", err)
+		}
+		defer req.Body.Close()
+		res, err := io.ReadAll(req.Body)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Erro ao ler resposta: %v\n", err)
+		}
+		var dados BrasilApi
+		err = json.Unmarshal(res, &dados)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Erro ao fazer parse da resposta: %v\n", err)
+		}
+
+		// Simulando um delay para testar o time out
+		//time.Sleep(2 * time.Second)
+
 		canal2 <- dados
 	}()
 
 	select {
 	case endereco := <-canal1:
-		fmt.Println("Api BrasilApi")
-		fmt.Printf("%+v\n", endereco)
+		fmt.Println("Api ViaCep:")
+		fmt.Printf("Dados: %+v\n", endereco)
 
 	case endereco := <-canal2:
-		fmt.Println("Api ViaCep")
-		fmt.Printf("%+v\n", endereco)
+		fmt.Println("Api BrasilApi:")
+		fmt.Printf("Dados: %+v\n", endereco)
 
 	case <-time.After(1 * time.Second):
-		fmt.Println("Time out")
+		fmt.Println("Erro de Time out")
 	}
 
 }

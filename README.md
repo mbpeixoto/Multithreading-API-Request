@@ -1,4 +1,10 @@
- Neste desafio você terá que usar o que aprendemos com Multithreading e APIs para buscar o resultado mais rápido entre duas APIs distintas.
+## Como testar
+1. Coloque o cep desejado da variável `cep := "<valor>"` no arquivo main.go.
+2. Rodar o arquivo main.go : `go run main.go`
+
+## Sobre o projeto
+
+Neste desafio você terá que usar o que aprendemos com Multithreading e APIs para buscar o resultado mais rápido entre duas APIs distintas.
 
 As duas requisições serão feitas simultaneamente para as seguintes APIs:
 
